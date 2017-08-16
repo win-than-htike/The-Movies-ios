@@ -38,4 +38,11 @@ class Constants{
         
     }
     
+    struct MovieSegue {
+        
+        public static let MOVIE_SEGUE_KEY : String = "movieDetail"
+        
+    }
+    
+    
 }

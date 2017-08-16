@@ -11,6 +11,7 @@ import SDWebImage
 
 class UpComingViewController: UIViewController {
     
+    let activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
     
     @IBOutlet weak var upComingCollectionView: UICollectionView!
     
@@ -19,12 +20,14 @@ class UpComingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        showIndicator()
+        
         NotificationCenter.default.addObserver(forName:NSNotification.Name(rawValue: Constants.NotificationKey.UPCOMING_NOTIFICATION_KEY), object:nil, queue:nil, using:loadedUpcomingMovie)
         
         let cellNib = UINib(nibName : "MovieCollectionViewCell", bundle : nil)
         upComingCollectionView.register(cellNib, forCellWithReuseIdentifier: Constants.MovieCellId.CELL_ID)
         upComingCollectionView.backgroundColor = UIColor.clear
-        NetworkManager.fetchUpComingMovie(1)
+        NetworkManager.shared().loadUpcomingMovie(page: 1)
         
     }
     
@@ -36,10 +39,36 @@ class UpComingViewController: UIViewController {
                 self.movieList.append(item)
             }
             
+            hideIndicator()
             self.upComingCollectionView.reloadData()
             
         }
         
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if segue.identifier == Constants.MovieSegue.MOVIE_SEGUE_KEY {
+            
+            if let dist = segue.destination as? MovieDetailViewController {
+                
+                dist.movie = sender as! Movie
+                
+            }
+            
+        }
+        
+    }
+    
+    func showIndicator(){
+        activityIndicator.center = self.view.center
+        activityIndicator.startAnimating()
+        upComingCollectionView.addSubview(activityIndicator)
+    }
+    
+    func hideIndicator(){
+        activityIndicator.stopAnimating()
+        activityIndicator.removeFromSuperview()
     }
 
 }
@@ -67,12 +96,20 @@ extension UpComingViewController : UICollectionViewDataSource {
         
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        performSegue(withIdentifier: Constants.MovieSegue.MOVIE_SEGUE_KEY, sender: self.movieList[indexPath.row])
+    }
+    
 }
 
 extension UpComingViewController : UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: self.upComingCollectionView.frame.width/4 - 16, height: 120)
+        let sideSize = (traitCollection.horizontalSizeClass == .compact &&
+            traitCollection.verticalSizeClass == .regular) ? 90.0 : 120.0
+        
+        return CGSize(width: sideSize - 16, height: 120)
     }
     
 }

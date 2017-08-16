@@ -7,3 +7,12 @@
 //
 
 import Foundation
+
+protocol MovieApiProtocol {
+    
+    func loadNowPlayingMovie(page : Int) -> Void
+    func loadUpcomingMovie(page : Int) -> Void
+    func loadPopularMovie(page : Int) -> Void
+    func loadTopRatedMovie(page : Int) -> Void
+    
+}
